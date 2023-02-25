@@ -2,17 +2,17 @@ import {useCallback, useEffect, useMemo, useState} from "react";
 import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {Image} from "antd";
+import {Image, Tabs} from "antd";
 import ImagesService from "../../utils/services/Images.js";
-
-const data =
-    [{'lien':"https://storage.googleapis.com/images-4al-cloud-gr2/chat_sniper.jpg", 'description':' sqds qdsqd sqdsq dsqd' },{'lien':"https://storage.googleapis.com/images-4al-cloud-gr2/1676666488723-pdp.jpg", 'description':'sdsqd sqdsqd sqd '}];
+const { TabPane } = Tabs;
 
 export default function ImageViewer(){
-    const [imageList, setImageList] = useState([]);
+    const [imageList, setImageList] = useState([])
+    const [unlinkedImageList, setUnlinkedImageList] = useState([]);
+
     const theme = 'ag-theme-alpine';
     const columns =[{
-        field: 'lien',
+        field: 'link',
         editable: false,
         height:200,
         cellRenderer: params => {
@@ -20,29 +20,57 @@ export default function ImageViewer(){
         }
     }
         ,{
-            field: 'description',
+            field: 'text',
             editable: true
 
         }];
 
     useEffect(() => {
-        ImagesService.retrieveImages().then(response => {
-            console.log(response)
+        ImagesService.retrieveLinkedImages().then(response => {
+
+            setImageList(response.data);
         })
-        setImageList(data);
+        ImagesService.retrieveImages().then(response => {
+
+            setUnlinkedImageList(mapUnlinkedImages(response.data));
+        })
     },[]);
+
+
+    function mapUnlinkedImages(fromServer){
+        return fromServer.map(image => {
+            return {link: image.link, text: null}
+        })
+    }
+
 
     const onCellEditRequest = useCallback(async (event) => {
         const imageWithText = {
-            link : event.data.lien,
+            link : event.data.link,
             text: event.newValue
         }
         let listToModify = imageList;
-        let imageToModify = imageList.findIndex(image => image.lien === event.data.lien);
+        let imageToModify = imageList.findIndex(image => image.link === event.data.link);
         listToModify[imageToModify].description = event.newValue;
 
         setImageList([...listToModify]);
-        const postResult = await ImagesService.saveImageText(imageWithText)
+        ImagesService.saveImageText(imageWithText).then(res => {
+            console.log(res)
+        });
+    }, [imageList]);
+
+    const onCellEditRequestNewLink = useCallback(async (event) => {
+        const imageWithText = {
+            link : event.data.link,
+            text: event.newValue
+        }
+        let listToModify = imageList;
+        listToModify.push(imageWithText)
+
+        setImageList([...listToModify]);
+        ImagesService.saveImageText(imageWithText).then(res => {
+            console.log(res)
+        });
     }, [imageList]);
 
 
@@ -55,17 +83,35 @@ export default function ImageViewer(){
 
     return (
         <>
-            <div className={theme} style={gridStyle}>
-                <AgGridReact
-                    ref={null}
-                    suppressRowClickSelection={true}
-                    pagination={false}
-                    readOnlyEdit={true}
-                    onCellEditRequest={onCellEditRequest}
-                    columnDefs={columns}
-                    rowHeight={100}
-                    rowData={imageList}></AgGridReact>
-            </div>
-        </>
+            <Tabs defaultActiveKey={"linkedImages"}>
+                <TabPane tab="Linked Images" key="linkedImages" style={{maxWidth:660}}>
+
+                    <div className={theme} style={gridStyle}>
+                    <AgGridReact
+                        ref={null}
+                        suppressRowClickSelection={true}
+                        pagination={false}
+                        readOnlyEdit={true}
+                        onCellEditRequest={onCellEditRequest}
+                        columnDefs={columns}
+                        rowHeight={100}
+                        rowData={imageList}></AgGridReact>
+                </div>
+                </TabPane>
+                <TabPane tab="UnLinked Images" key="unlinkedImages" style={{maxWidth:660}}>
+                    <div className={theme} style={gridStyle}>
+                        <AgGridReact
+                            ref={null}
+                            suppressRowClickSelection={true}
+                            pagination={false}
+                            readOnlyEdit={true}
+                            onCellEditRequest={onCellEditRequestNewLink}
+                            columnDefs={columns}
+                            rowHeight={100}
+                            rowData={unlinkedImageList}></AgGridReact>
+                    </div>
+                </TabPane>
+            </Tabs>
+                </>
     )
 }

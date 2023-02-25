@@ -1,21 +1,27 @@
 import axiosInstance from './AxtiosInstance.js';
 
-// Login and logout service
+const getAllImagesWithText = () => {
+    return axiosInstance.get("/linked-images");
+};
+
 const getAllImages = () => {
-    return axiosInstance.get();
+    return axiosInstance.get("");
 };
 
 const uploadImage = (image) => {
-    return axiosInstance.post('/create', image);
+    console.log(image)
+    return axiosInstance.post('/create', image,{ headers: {'Content-Type': 'multipart/form-data'}});
 };
 
 const linkImageToText = (imageAndText) => {
-    return axiosInstance.post('/create-linked-image', imageAndText);
+    console.log(imageAndText)
+    return axiosInstance.post('/create-linked-image', imageAndText );
 };
 
 
 const ImageService = {
     retrieveImages: getAllImages,
+    retrieveLinkedImages: getAllImagesWithText,
     saveImage: uploadImage,
     saveImageText: linkImageToText
 };
