@@ -78,6 +78,55 @@ Region: West Europe
 ![img_16.png](PngAddicts/img/img_16.png)
 
 # Congratulations, you deployed your first react app using Azure
+# Now we can check how to deploy the upgraded version, the static web app
+
+Azure static web apps are a special kind of app service designed to how new gen
+front-end framework/libraries. It allows to serve static file, and can provide
+serverless azure functions for API usage (primarly used for server side rendering and SSO)
+
+Let's check the step
+
+* Go to your azure resources portal, click on create new resource
+
+![img.png](PngAddicts/img/img_17.png)
+
+* In the search bar, type static, you'll see the option static web app
+
+![img_1.png](PngAddicts/img/img_18.png)
+
+* Click on create 
+
+* Same as app service, set up your resource group, app name, the plan type and the region (EU West here)
+
+* Link your github account or select azure devops repo, select the good repo / branch to deploy
+
+* Azure allows you to preview the worflow file, static apps use github actions as main workflow
+
+* If your repository is nested, change the app_location and output_location 
+
+![img_2.png](PngAddicts/img/img_19.png)
+
+## Output location is relative to app_location. app_location sets the working directory.
+
+* Click on review and create 
+
+* A git action will trigger instantly, go to your repo 
+
+* Go to actions 
+
+![img_3.png](PngAddicts/img/img_20.png)
+
+* Click on the running job
+
+* Once every thing is done, you'll get the link to your azure site in the "build and deploy" section of the job
+
+![img_4.png](PngAddicts/img/img_21.png)
+
+* Click url provided 
+
+# Congratulations, you deployed a static web app using Azure services 
+
+![img_5.png](PngAddicts/img/img_22.png)
 
 
 
